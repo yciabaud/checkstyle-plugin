@@ -1,5 +1,8 @@
 package hudson.plugins.checkstyle.rules;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -14,6 +17,7 @@ import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.digester.Digester;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
@@ -72,9 +76,45 @@ public final class CheckStyleRules {
             log(exception);
         }
     }
+    
+    /**
+     * Initializes the rules.
+     * 
+     * @param additional rules path
+     */
+    public void initialize(String rulesPath){
+
+        initialize();
+        
+        try{
+            if(rulesPath != null && !"".contains(rulesPath)){
+                File additionalRules = new File(rulesPath);
+                FileFilter filter = new SuffixFileFilter(".xml");
+                for(File config : additionalRules.listFiles(filter)){
+                    Digester digester = createDigester();
+                    List<Rule> rules = new ArrayList<Rule>();
+                    digester.push(rules);
+                    digester.parse(new FileInputStream(config));
+                    for (Rule rule : rules) {
+                        rulesByName.put(rule.getName(), rule);
+                    }
+                }
+            }
+        }
+        catch (ParserConfigurationException exception) {
+            log(exception);
+        }
+        catch (IOException exception) {
+            log(exception);
+        }
+        catch (SAXException exception) {
+            log(exception);
+        }
+        
+    }
 
     private void log(final Throwable exception) {
-        Logger.getLogger(CheckStyleRules.class.getName()).log(Level.SEVERE, "Can't initialize checkstyle rules.", exception);
+        Logger.getLogger(CheckStyleRules.class.getName()).log(Level.SEVERE, "Can't initialize additional checkstyle rules.", exception);
     }
 
     /**
