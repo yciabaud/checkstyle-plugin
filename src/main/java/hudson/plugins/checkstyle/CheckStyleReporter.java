@@ -32,9 +32,6 @@ public class CheckStyleReporter extends HealthAwareReporter<CheckStyleResult> {
 
     /** Default Checkstyle pattern. */
     private static final String CHECKSTYLE_XML_FILE = "checkstyle-result.xml";
-    
-    /** Do we extract the path if the package cannot be found. */
-    private boolean shouldShowPath;
 
     /**
      * Creates a new instance of <code>CheckStyleReporter</code>.
@@ -86,8 +83,6 @@ public class CheckStyleReporter extends HealthAwareReporter<CheckStyleResult> {
      *            annotation threshold
      * @param canRunOnFailed
      *            determines whether the plug-in can run for failed builds, too
-     * @param shouldShowPath
-     *            determines whether path have to be displayed in the GUI
      */
     // CHECKSTYLE:OFF
     @SuppressWarnings("PMD.ExcessiveParameterList")
@@ -97,14 +92,13 @@ public class CheckStyleReporter extends HealthAwareReporter<CheckStyleResult> {
             final String unstableNewAll, final String unstableNewHigh, final String unstableNewNormal, final String unstableNewLow,
             final String failedTotalAll, final String failedTotalHigh, final String failedTotalNormal, final String failedTotalLow,
             final String failedNewAll, final String failedNewHigh, final String failedNewNormal, final String failedNewLow,
-            final boolean canRunOnFailed, final boolean shouldShowPath) {
+            final boolean canRunOnFailed) {
         super(healthy, unHealthy, thresholdLimit, useDeltaValues,
                 unstableTotalAll, unstableTotalHigh, unstableTotalNormal, unstableTotalLow,
                 unstableNewAll, unstableNewHigh, unstableNewNormal, unstableNewLow,
                 failedTotalAll, failedTotalHigh, failedTotalNormal, failedTotalLow,
                 failedNewAll, failedNewHigh, failedNewNormal, failedNewLow,
                 canRunOnFailed, PLUGIN_NAME);
-        this.shouldShowPath = shouldShowPath;
     }
     // CHECKSTYLE:ON
 
@@ -117,30 +111,10 @@ public class CheckStyleReporter extends HealthAwareReporter<CheckStyleResult> {
     public ParserResult perform(final MavenBuildProxy build, final MavenProject pom,
             final MojoInfo mojo, final PluginLogger logger) throws InterruptedException, IOException {
         FilesParser checkstyleCollector = new FilesParser(new StringPluginLogger(PLUGIN_NAME),
-                CHECKSTYLE_XML_FILE, new CheckStyleParser(getDefaultEncoding(), shouldShowPath(), build.getProjectRootDir().getName())
-                , getModuleName(pom));
+                CHECKSTYLE_XML_FILE, new CheckStyleParser(getDefaultEncoding()), getModuleName(pom));
 
         return getTargetPath(pom).act(checkstyleCollector);
     }
-    
-    /**
-     * Returns whether path have to be displayed in the GUI.
-     *
-     * @return whether path have to be displayed in the GUI
-     */
-    public boolean getShouldShowPath() {
-        return shouldShowPath;
-    }
-    
-    /**
-     * Returns whether path have to be displayed in the GUI.
-     *
-     * @return whether path have to be displayed in the GUI
-     */
-    public boolean shouldShowPath() {
-        return shouldShowPath;
-    }
-
 
     @Override
     protected CheckStyleResult createResult(final MavenBuild build, final ParserResult project) {

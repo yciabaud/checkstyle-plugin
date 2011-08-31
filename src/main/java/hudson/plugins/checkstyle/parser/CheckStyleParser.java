@@ -24,15 +24,6 @@ import org.xml.sax.SAXException;
 public class CheckStyleParser extends AbstractAnnotationParser {
     /** Unique identifier of this class. */
     private static final long serialVersionUID = -8705621875291182458L;
-    
-    /** Constant used when the package cannot be found. */
-    private static final String UNKNOWN_PACKAGE = "-";
-    
-    /** Path to the workspace. */
-    private String workspacePath;
-    
-    /** Do we extract the path if the package cannot be found. */
-    private boolean shouldShowPath;
 
     /**
      * Creates a new instance of {@link CheckStyleParser}.
@@ -46,18 +37,9 @@ public class CheckStyleParser extends AbstractAnnotationParser {
      *
      * @param defaultEncoding
      *            the default encoding to be used when reading and parsing files
-     * @param shouldShowPath
-     *            true if we need extract the path if the package cannot be found
-     * @param workspacePath
-     *            path to the workspace
      */
-    public CheckStyleParser(final String defaultEncoding, 
-            final boolean shouldShowPath, final String workspacePath) {
+    public CheckStyleParser(final String defaultEncoding) {
         super(defaultEncoding);
-        
-        this.workspacePath = workspacePath;
-        this.shouldShowPath = shouldShowPath;
-                
     }
 
     /** {@inheritDoc} */
@@ -113,16 +95,6 @@ public class CheckStyleParser extends AbstractAnnotationParser {
         for (hudson.plugins.checkstyle.parser.File file : collection.getFiles()) {
             if (isValidWarning(file)) {
                 String packageName = new JavaPackageDetector().detectPackageName(file.getName());
-                
-                if(shouldShowPath && packageName.equals(UNKNOWN_PACKAGE)){
-                    if(file.getName().startsWith(workspacePath)){
-                        packageName = new java.io.File(file.getName()).getParent()
-                                .substring(workspacePath.length());
-                    }else{
-                        packageName = new java.io.File(file.getName()).getParent();
-                    }
-                }
-                
                 for (Error error : file.getErrors()) {
                     Priority priority;
                     if ("error".equalsIgnoreCase(error.getSeverity())) {

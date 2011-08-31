@@ -6,9 +6,5 @@
   </f:entry>
   <f:advanced>
     <u:advanced id="checkstyle"/>
-    <f:entry title="${%Show file path}" field="shouldShowPath"
-           description="${%description.shouldShowPath}">
-        <f:checkbox/>
-    </f:entry>
   </f:advanced>
 </j:jelly>
